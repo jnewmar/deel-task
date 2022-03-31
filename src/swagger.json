@@ -1,0 +1,636 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "Documentation of the DEEL BackEnd Task EndPoints",
+    "version": "1.0.6",
+    "title": "Swagger DEEL BackEnd Task",
+    "termsOfService": "http://swagger.io/terms/",
+    "contact": {
+      "email": "william.mori@gmail.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "host": "localhost:3001",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "Contract"
+    },
+    {
+      "name": "Job"
+    },
+    {
+      "name": "TopUsers"
+    },
+    {
+      "name": "Profile"
+    },
+    {
+      "name": "Transactions"
+    }
+  ],
+  "schemes": [
+    "http"
+  ],
+  "paths": {
+    "/contracts/{id}": {
+      "get": {
+        "tags": [
+          "Contract"
+        ],
+        "summary": "Get a contract associated with the given id",
+        "description": "The contract is returned only if the profile_id informed in the header is the client or the contractor in the contract",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of contract",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "profile_id",
+            "in": "header",
+            "description": "the profile id of the logged user",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/Contract"
+            }
+          },
+          "401": {
+            "description": "returned when the informed profile_id doesn't match any profile"
+          },
+          "403": {
+            "description": "returned when the informed profile_id is not the client or the contractor of the contract"
+          },
+          "404": {
+            "description": "returned when the informed doesn't have any associated contract"
+          }
+        }
+      }
+    },
+    "/contracts": {
+      "get": {
+        "tags": [
+          "Contract"
+        ],
+        "summary": "Returns a list of all contracts belonging to a user (client or contractor), the list should only contain non terminated contracts",
+        "description": "",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "profile_id",
+            "in": "header",
+            "description": "the profile id of the logged user",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Contract"
+              }
+            }
+          },
+          "401": {
+            "description": "Informed profile_id doesn't match any profile"
+          }
+        }
+      }
+    },
+    "/jobs/unpaid": {
+      "get": {
+        "tags": [
+          "Job"
+        ],
+        "summary": "Get all unpaid jobs for a user (either a client or contractor), for active contracts only. Contracts are considered active only when in status `in_progress`",
+        "description": "An unpaid job is a job entry with the paid property not present or with value false",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "profile_id",
+            "in": "header",
+            "description": "the profile id of the logged user",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Job"
+              }
+            }
+          },
+          "401": {
+            "description": "Informed profile_id doesn't match any profile"
+          }
+        }
+      }
+    },
+    "/jobs/{job_id}/pay": {
+      "post": {
+        "tags": [
+          "Job",
+          "Transactions"
+        ],
+        "summary": "Pay for a job, a client can only pay if his balance >= the amount to pay. The amount should be moved from the client's balance to the contractor balance",
+        "description": " **Notes**\n\n**Note 1** An unpaid job is a job entry with the paid property not present or with value false\n\n**Note 2** : Only profiles of type client could pay a job\n\n**Note 3** : Only the client in the contract associated with the job could pay it\n\n**Note 4** : A client can only pay if his balance >= the amount to pay\n\n**Note 5** : Only unpaid jobs could be paid it\n\n**Note 6** : The payment operation will be successful only if all the updates in the Job data, client balance, and contractor balance were successful, if not the operation will fail and no data is updated\n\n",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "profile_id",
+            "in": "header",
+            "description": "the profile id of the logged user",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "job_id",
+            "in": "path",
+            "description": "ID of Job to pay",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "400": {
+            "description": "Returned  when:\n\n Job was already paid or\n\n The client has insufficient balance to pay or\n\n The logged user is not a client\n",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "401": {
+            "description": "Informed profile_id doesn't match any profile",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "403": {
+            "description": "Returned  when:\n\n Logged client is not the client in the contract associated with the job ",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "404": {
+            "description": "Returned  when:\n\n Job not found or\n\n Contract associated with the job was not found or\n\n Contractor of the Contract associated with the job was not found ",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "500": {
+            "description": "Returned  when:\n\n An error occurs trying to update the Payment data in Job or\n\n An error occurs trying to update the Balance of client profile or\n\n An error occurs trying to update the Balance of contractor profile \n\n Note: No data is updated in these cases  ",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          }
+        }
+      }
+    },
+    "/balances/deposit/{user_id}": {
+      "post": {
+        "tags": [
+          "Transactions",
+          "Profile"
+        ],
+        "summary": "Deposits money into the the the balance of a client, a client can't deposit more than 25% his total of jobs to pay. (at the deposit moment)",
+        "description": " **Notes**\n\n**Note 1** The value to deposit is informed in cents. per example US$1 should be sent as 100\n\n**Note 2** : Client can't deposit more than 25% his total of jobs to pay. (at the deposit moment). If the client doesn't have values to pay. the restriction will be in the current balance and in the value to deposit. This rule is not applied for logged contractors\n\n**Note 3** : Besides the 25% rule, a user can only deposit if his balance >= the amount to deposit\n\n**Note 4** : The values come from the balance of the logged user to the balance of the informed user\n\n**Note 5** : The source user and destination user could be client or contractor, there is no restriction\n\n**Note 6** : The payment operation will be successful only if all the updates in the source user balance and the destination user balance were successful, if not the operation will fail and no data is updated\n\n",
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "profile_id",
+            "in": "header",
+            "description": "the profile id of the logged user",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "user_id",
+            "in": "path",
+            "description": "ID of target profile to deposit",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "body",
+            "name": "value",
+            "required": true,
+            "description": "The value to deposit in cents, per example US$1 is 100",
+            "schema": {
+              "type": "object",
+              "required": [
+                "value"
+              ],
+              "properties": {
+                "value": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "400": {
+            "description": "Returned  when:\n\n Invalid value to deposit or\n\n User has insufficient balance to deposit or\n\n Client trying to deposit more than 25% of his total of jobs to pay\n",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "401": {
+            "description": "Informed profile_id doesn't match any profile",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "404": {
+            "description": "Returned  when:\n\n Informed user to deposit was not found ",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "500": {
+            "description": "Returned  when:\n\n An error occurs trying to update the Balance of source profile or\n\n An error occurs trying to update the Balance of target profile \n\n Note: No data is updated in these cases  ",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          }
+        }
+      }
+    },
+    "/admin/best-profession": {
+      "get": {
+        "tags": [
+          "TopUsers",
+          "Profile"
+        ],
+        "summary": "Returns the profession that earned the most money (sum of jobs paid).",
+        "description": " **Notes**\n\n**Note 1** Besides the documentation ask to return only the contactor that worked in the query time range, this implementation improved that returning all the contractor even the ones that doesn't have payment in the selected range \n\n **Note 2** : Besides the documentation doesn't ask to paginate the returned values, this implementation improved that receiving the limit and offset parameter and returning the the total of contractors\n \n\n **Note 3** : The start and the end are expect to be in the YYYY-MM-DD format, and the result are filtered from the beginning of the start date to the end of the end date. So, if this Endpoint receives the same day in the start and end date, the values will be filtered from the beginning to the end of this date \n\n **Note 4** : This implementation are assuming the payment dates and the start and end dates to filter are in the same timezone. Handle distinct timezones is out of the scope of this implementation \n\n **Note 5** : The result of this endpoint are descending sorted by the total value received, and  for the entries with same amounts of total value received, it is used the first name and last name to sort in an ascending way \n\n **Note 6** : For this Endpoint was chosen to use a raw query in order to avoid any issue related with queries the generated by the sequelize, since this is endpoint is using a non trivial query to retrieve the results\n",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "profile_id",
+            "in": "header",
+            "description": "the profile id of the logged user",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "description": "The start date to filter YYYY-MM-DD",
+            "type": "string",
+            "format": "date",
+            "required": true
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "description": "The end date to filter YYYY-MM-DD",
+            "type": "string",
+            "format": "date",
+            "required": true
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "The amount of record to return. If omitted the default value is 2",
+            "type": "integer",
+            "required": false
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "The offset to return the users. Starting from 0. If omitted the default value is 0",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "total": {
+                  "type": "integer",
+                  "description": "The total of found records"
+                },
+                "topUser": {
+                  "description": "The list of contractor descending sorted by the total value received",
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/TopUser"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returned  when:\n\n Invalid start date or\n\n Invalid end date or\n\n End date is before start date "
+          },
+          "401": {
+            "description": "Informed profile_id doesn't match any profile"
+          }
+        }
+      }
+    },
+    "/admin/best-clients": {
+      "get": {
+        "tags": [
+          "TopUsers",
+          "Profile"
+        ],
+        "summary": "returns the clients the paid the most for jobs in the query time period. limit query parameter should be applied, default limit is 2.",
+        "description": " **Notes**\n\n**Note 1** Besides the documentation ask to return only the clients that worked in the query time range, this implementation improved that returning all the clients even the ones that doesn't have payment in the selected range \n\n **Note 2** : Besides the documentation doesn't ask to set an offset in the returned values, this implementation improved that receiving the offset parameter and returning the the total of clients\n \n\n **Note 3** : The start and the end are expect to be in the YYYY-MM-DD format, and the result are filtered from the beginning of the start date to the end of the end date. So, if this Endpoint receives the same day in the start and end date, the values we be filtered from the beginning to the end of this date \n\n **Note 4** : This implementation are assuming the payment dates and the start and end dates to filter are in the same timezone. Handle distinct timezones is out of the scope of this implementation \n\n **Note 5** : The result of this endpoint are descending sorted by the total value received, and  for the entries with same amounts of total value received, it is used the first name and last name to sort in an ascending way \n\n **Note 6** : For this Endpoint was chosen to use a raw query in order to avoid any issue related with queries the generated by the sequelize, since this is endpoint is using a non trivial query to retrieve the results\n",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "profile_id",
+            "in": "header",
+            "description": "the profile id of the logged user",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "description": "The start date to filter YYYY-MM-DD",
+            "type": "string",
+            "format": "date",
+            "required": true
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "description": "The end date to filter YYYY-MM-DD",
+            "type": "string",
+            "format": "date",
+            "required": true
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "The amount of record to return. If omitted the default value is 2",
+            "type": "integer",
+            "required": false
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "The offset to return the users. Starting from 0. If omitted the default value is 0",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "total": {
+                  "type": "integer",
+                  "description": "The total of found records"
+                },
+                "topUser": {
+                  "description": "The list of clients descending sorted by the total value received",
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/TopUser"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returned  when:\n\n Invalid start date or\n\n Invalid end date or\n\n End date is before start date "
+          },
+          "401": {
+            "description": "Informed profile_id doesn't match any profile"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "ApiResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "ok",
+            "fail"
+          ]
+        },
+        "error": {
+          "type": "string"
+        }
+      }
+    },
+    "Contract": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "terms": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "description": "Order Status",
+          "enum": [
+            "new",
+            "in_progress",
+            "terminated"
+          ]
+        },
+        "ContractorId": {
+          "type": "integer"
+        },
+        "ClientId": {
+          "type": "integer"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "Jobs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "description": {
+                "type": "string",
+                "example": "Work"
+              },
+              "price": {
+                "type": "number",
+                "format": "float"
+              },
+              "paid": {
+                "type": "boolean"
+              },
+              "paymentDate": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "ContractId": {
+                "type": "integer"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        }
+      }
+    },
+    "Job": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "description": {
+          "type": "string",
+          "example": "Work"
+        },
+        "price": {
+          "type": "number",
+          "format": "float"
+        },
+        "paid": {
+          "type": "boolean"
+        },
+        "paymentDate": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "ContractId": {
+          "type": "integer"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "Contract": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "terms": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string",
+              "description": "Order Status",
+              "enum": [
+                "new",
+                "in_progress",
+                "terminated"
+              ]
+            },
+            "ContractorId": {
+              "type": "integer"
+            },
+            "ClientId": {
+              "type": "integer"
+            },
+            "createdAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updatedAt": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        }
+      }
+    },
+    "TopUser": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "totalPaid": {
+          "type": "number",
+          "format": "float"
+        }
+      }
+    }
+  }
+}

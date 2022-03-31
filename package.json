@@ -1,0 +1,38 @@
+{
+  "name": "deel-task",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "4.17.1",
+    "moment": "^2.29.1",
+    "sequelize": "^6.3.4",
+    "sqlite3": "^5.0.2",
+    "swagger-ui-express": "^4.3.0"
+  },
+  "scripts": {
+    "swagger": "js-yaml ./api/swagger/swagger.yaml > src/swagger.json",
+    "start": "npm run swagger && node --trace-warnings ./src/server.js",
+    "start:dev": "npm run swagger && nodemon --trace-warnings ./src/server.js",
+    "seed": "node ./scripts/seedDb.js",
+    "test": "jest",
+    "swagger:edit": "swagger project edit",
+    "code-style": "standard"
+  },
+  "devDependencies": {
+    "concurrently": "4.1.0",
+    "jest": "^27.5.1",
+    "jest-when": "^3.5.1",
+    "nodemon": "1.19.1",
+    "standard": "^16.0.4",
+    "swagger": "^0.7.5",
+    "swagger-editor": "^4.2.2"
+  },
+  "engines": {
+    "node": ">=10.16.3"
+  },
+  "engineStrict": true,
+  "standard": {
+    "env": [ "jest" ]
+  }
+}
