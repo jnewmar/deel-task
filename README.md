@@ -1,12 +1,12 @@
 # DEEL BACKEND TASK
 
 ## Code styling
-For this project it was used JavaScript Standard Style guide (https://standardjs.com/index.html)
+For this project it was used JavaScript Standard Style guide (https://standardjs.com/)
 To command to run the style guide check is:
 
-´´´´
+````
 npm run code-style
-´´´´
+````
 
 ## Docs
 
@@ -14,15 +14,15 @@ It was used swagger, swagger-ui-express and swagger-editor to create the documen
 
 The api/swagger/swagger.yaml file was create using the swagger editor. To run it the command is:
 
-´´´´
+````
 npm run swagger:edit
-´´´´
+````
 
 And to create src/swagger.json from the swagger.yaml  file is used the command:
 
-´´´´
+````
 npm run swagger
-´´´´
+````
 
 The src/swagger.json is served by the swagger-ui-express in the url http://localhost:3001/api-docs
 
@@ -37,15 +37,15 @@ It was used jest (https://jestjs.io/) and jest-when to create some tests for the
 The tests are in the src/controllers/__test__ directory.
 To command to run the tests are:
 
-´´´´
+````
 npm run test
-´´´´
+````
 
 That should result in something like:
 
-´´´´´
+````
 npm run test
-´´´´´
+````
 
 ## EndPoint Notes
 
