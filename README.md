@@ -2,7 +2,7 @@
 
 ## Code styling
 For this project it was used JavaScript Standard Style guide (https://standardjs.com/)
-To command to run the style guide check is:
+The command to run the style guide check is:
 
 ````
 npm run code-style
@@ -28,20 +28,14 @@ The src/swagger.json is served by the swagger-ui-express in the url http://local
 
 Note: The getProfile.js middleware was updated in order to skip the api-docs url
 
-Alternatively there is a Postman collection (DEEL BACKEND TASK.postman_collection.json) in the root path with requests for each EndPoint
+Alternatively there is a Postman collection (DEEL BACKEND TASK.postman_collection.json) in the root directory with requests for each EndPoint
 
 
 ## Tests
 
 It was used jest (https://jestjs.io/) and jest-when to create some tests for the functions used to implement the EndPoints
 The tests are in the src/controllers/__test__ directory.
-To command to run the tests are:
-
-````
-npm run test
-````
-
-That should result in something like:
+The command to run the tests are:
 
 ````
 npm run test
@@ -53,15 +47,15 @@ npm run test
 
 - Note 1 The value to deposit is informed in cents. per example US$1 should be sent as 100
 
-- Note 2 : Client can't deposit more than 25% his total of jobs to pay. (at the deposit moment). If the client doesn't have values to pay. the restriction will be in the current balance and in the value to deposit. This rule is not applied for logged contractors
+- Note 2 : Client can't deposit more than 25% his total of jobs to pay. (at the deposit moment). If the client doesn't have values to pay. The restriction will be in the current balance and in the value to deposit. This rule is not applied for logged contractors
 
 - Note 3 : Besides the 25% rule, a user can only deposit if his balance >= the amount to deposit
 
 - Note 4 : The values come from the balance of the logged user to the balance of the informed user
 
-- Note 5 : The source user and destination user could be client or contractor, there is no restriction
+- Note 5 : The source user and destination user could be even client or contractor, there is no restriction
 
-- Note 6 : The payment operation will be successful only if all the updates in the source user balance and the destination user balance were successful, if not the operation will fail and no data is updated
+- Note 6 : The payment operation will be successful only if all the updates in the source user balance and the destination user balance were successful, if not, the operation will fail and no data is updated
 
 ### POST /jobs/{job_id}/pay
 
@@ -75,7 +69,7 @@ npm run test
 
 - Note 5 : Only unpaid jobs could be paid it
 
-- Note 6 : The payment operation will be successful only if all the updates in the Job data, client balance, and contractor balance were successful, if not the operation will fail and no data is updated
+- Note 6 : The payment operation will be successful only if all the updates in the Job data, client balance, and contractor balance were successful, if not, the operation will fail and no data is updated
 
 
 ### GET /admin/best-profession
